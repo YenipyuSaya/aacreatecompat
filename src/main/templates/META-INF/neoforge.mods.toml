@@ -109,3 +109,11 @@ Adds a "Create Process" mode to the Atomic Reconstructor so it processes items o
     versionRange="[6.0.0,6.1)"
     ordering="AFTER"
     side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="curios"
+    type="optional"
+    versionRange="[9.0,)"
+    ordering="AFTER"
+    side="BOTH"
+
