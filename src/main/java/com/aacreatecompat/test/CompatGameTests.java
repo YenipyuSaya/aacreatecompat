@@ -2,7 +2,11 @@ package com.aacreatecompat.test;
 
 import com.aacreatecompat.AACreateCompat;
 import com.aacreatecompat.CreateModeHolder;
+import com.aacreatecompat.goggles.GoggleCompat;
+import de.ellpeck.actuallyadditions.mod.items.ItemEngineerGoggles;
 import com.simibubi.create.AllBlocks;
+import com.simibubi.create.AllItems;
+import com.simibubi.create.content.equipment.goggles.GogglesItem;
 import com.simibubi.create.content.kinetics.belt.BeltBlockEntity;
 import com.simibubi.create.content.kinetics.belt.BeltHelper;
 import com.simibubi.create.content.kinetics.belt.item.BeltConnectorItem;
@@ -17,6 +21,10 @@ import de.ellpeck.actuallyadditions.mod.items.ActuallyItems;
 import de.ellpeck.actuallyadditions.mod.tile.TileEntityAtomicReconstructor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -240,5 +248,43 @@ public class CompatGameTests {
             h.assertTrue(!near.isAlive(), "near dropped item not converted");
             h.assertTrue(far.isAlive() && far.getItem().is(Items.DIAMOND), "far item touched");
         });
+    }
+
+    // ---------- goggle cross-compat (helmet / Create overlay / AA laser wearing) ----------
+    private static net.minecraft.world.entity.player.Player helmeted(GameTestHelper h, ItemStack helmet) {
+        net.minecraft.world.entity.player.Player p = h.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        p.setItemSlot(EquipmentSlot.HEAD, helmet);
+        return p;
+    }
+
+    @GameTest(template = "empty7")
+    public static void gogglesAaHelmetGivesCreateOverlay(GameTestHelper h) {
+        var regular = helmeted(h, new ItemStack(ActuallyItems.ENGINEERS_GOGGLES.get()));
+        var infrared = helmeted(h, new ItemStack(ActuallyItems.ENGINEERS_GOGGLES_ADVANCED.get()));
+        h.assertTrue(GogglesItem.isWearingGoggles(regular), "regular AA goggles should count as Create goggles");
+        h.assertTrue(GogglesItem.isWearingGoggles(infrared), "infrared AA goggles should count as Create goggles");
+        h.assertTrue(GoggleCompat.isWearingInfraredGoggles(infrared), "infrared helmet should grant spectral vision");
+        h.assertTrue(!GoggleCompat.isWearingInfraredGoggles(regular), "regular AA goggles should not grant spectral vision");
+        h.succeed();
+    }
+
+    @GameTest(template = "empty7")
+    public static void gogglesCreateHelmetSeesAaLasers(GameTestHelper h) {
+        var create = helmeted(h, new ItemStack(AllItems.GOGGLES.get()));
+        var empty = helmeted(h, ItemStack.EMPTY);
+        h.assertTrue(ItemEngineerGoggles.isWearing(create), "Create goggles should pass AA isWearing (lasers/HUD)");
+        h.assertTrue(GogglesItem.isWearingGoggles(create), "Create helmet should still be wearing Create goggles");
+        h.assertTrue(!GoggleCompat.isWearingInfraredGoggles(create), "Create goggles must not grant AA infrared glow");
+        h.assertTrue(!ItemEngineerGoggles.isWearing(empty), "empty helmet should not be wearing AA/Create goggles");
+        h.assertTrue(!GogglesItem.isWearingGoggles(empty), "empty helmet should not be wearing Create goggles");
+        h.succeed();
+    }
+
+    @GameTest(template = "empty7")
+    public static void gogglesAaTaggedForCuriosHead(GameTestHelper h) {
+        var tag = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("curios", "head"));
+        h.assertTrue(new ItemStack(ActuallyItems.ENGINEERS_GOGGLES.get()).is(tag), "regular AA goggles missing from curios:head");
+        h.assertTrue(new ItemStack(ActuallyItems.ENGINEERS_GOGGLES_ADVANCED.get()).is(tag), "infrared AA goggles missing from curios:head");
+        h.succeed();
     }
 }

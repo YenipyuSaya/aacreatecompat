@@ -1,5 +1,7 @@
 package com.aacreatecompat;
 
+import com.aacreatecompat.goggles.CuriosGoggles;
+import com.aacreatecompat.goggles.GoggleCompat;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.component.DataComponentType;
@@ -26,6 +28,10 @@ public class AACreateCompat {
     public AACreateCompat(IEventBus modBus, ModContainer container) {
         container.registerConfig(ModConfig.Type.SERVER, CompatConfig.SPEC);
         COMPONENTS.register(modBus);
+        GoggleCompat.register();
+        if (GoggleCompat.curiosLoaded()) {
+            CuriosGoggles.init(modBus);
+        }
         NeoForge.EVENT_BUS.register(PlacementHandler.class);
         if (Boolean.getBoolean("aacreatecompat.verifyMixins")) {
             for (String c : new String[]{"de.ellpeck.actuallyadditions.mod.tile.TileEntityAtomicReconstructor",

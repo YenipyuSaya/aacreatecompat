@@ -138,6 +138,9 @@ dependencies {
     compileOnly("dev.engine-room.flywheel:flywheel-neoforge-api-1.21.1:${flywheel_version}") { transitive = false }
     runtimeOnly("dev.engine-room.flywheel:flywheel-neoforge-1.21.1:${flywheel_version}") { transitive = false }
     runtimeOnly("dev.engine-room.vanillin:vanillin-neoforge-1.21.1:${vanillin_version}") { transitive = false }
+    // Optional Curios API: compile against it, present in dev runs, not a hard runtime dep
+    compileOnly("top.theillusivec4.curios:curios-neoforge:${curios_version}:api")
+    localRuntime("top.theillusivec4.curios:curios-neoforge:${curios_version}")
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
